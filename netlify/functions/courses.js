@@ -44,7 +44,7 @@ exports.handler = async function(event) {
   let db = firebase.firestore()
 
   // ask Firebase for the course that corresponds to the course number, wait for the response
-  let courseQuery = await db.collection('courses').where(`courseNumber`, `==`, courseNumber).get()
+  let courseQuery = await db.collection(`courses`).where(`courseNumber`, `==`, courseNumber).get()
 
   // get the first document from the query
   let course = courseQuery.docs[0]
@@ -59,12 +59,12 @@ exports.handler = async function(event) {
   courseData.sections = []
 
   // ask Firebase for the sections corresponding to the Document ID of the course, wait for the response
-  let sectionsQuery = await db.collection('sections').where(`courseId`, `==`, courseId).get()
+  let sectionsQuery = await db.collection(`sections`).where(`courseId`, `==`, courseId).get()
 
   // get the documents from the query
   let sections = sectionsQuery.docs
 
-  // loop through the documents
+  // loop through the documents...need a loop here because you have multiple sections per course
   for (let i=0; i < sections.length; i++) {
     // get the document ID of the section
     let sectionId = sections[i].id
@@ -72,7 +72,7 @@ exports.handler = async function(event) {
     // get the data from the section
     let sectionData = sections[i].data()
 
-    // ask Firebase for the lecturer with the ID provided by the section; hint: read "Retrieve One Document (when you know the Document ID)" in the reference
+    // ask Firebase for the lecturer with the ID provided by the section; hint: read "Retrieve One Document (when you know the Document ID)" in the reference, no need for a loop here since you only have one lecturer per section
     let lecturerQuery = await db.collection('lecturers').doc(sectionData.lecturerId).get()
 
     // get the data from the returned document
@@ -85,6 +85,33 @@ exports.handler = async function(event) {
     courseData.sections.push(sectionData)
 
     // 🔥 your code for the reviews/ratings goes here
+
+    // ask Firebase for the reviews corresponding to the section ID of the course, wait for the response
+  let reviewsQuery = await db.collection(`reviews`).where(`sectionId`, `==`, sectionId).get()
+
+  // get the documents from the query
+  let review = reviewsQuery.docs
+
+  // loop through the documents because you have multiple reviews per section
+  for (let reviewIndex=0; reviewIndex < review.length; reviewIndex++) {
+    
+    /* // get the document ID of the reviews
+    let reviewId = reviews[reviewIndex].id */
+
+    // get the data from the reviews
+    let reviewData = reviews[reviewIndex].data()
+  
+   /* // add the ratingsto the section's data
+    sectionData.rating = reviewData.rating
+
+    // add the review data to the courseData
+    courseData.sections.push(sectionData) */
+    
+
+  // add the review data to the courseData 
+
+   courseData.reviews.push(reviewData)
+
   }
 
   // return the standard response
@@ -92,4 +119,5 @@ exports.handler = async function(event) {
     statusCode: 200,
     body: JSON.stringify(courseData)
   }
+}
 }
