@@ -31,6 +31,8 @@
 // - The third model, sections, contains the following fields: courseId, lecturerId
 // - The fourth model, reviews, contains the following fields, sectionId, body, rating
 
+//http://localhost:8888/.netlify/functions/courses?courseNumber=KIEI
+
 // allows us to use firebase
 let firebase = require(`./firebase`)
 
@@ -38,7 +40,7 @@ let firebase = require(`./firebase`)
 exports.handler = async function(event) {
 
   // get the course number being requested
-  let courseNumber = event.queryStringParameters.courseNumber
+  let courseNumber = event.queryStringParameters.courseNumber //looking at the URL for this specific query string
 
   // establish a connection to firebase in memory
   let db = firebase.firestore()
@@ -82,7 +84,7 @@ exports.handler = async function(event) {
     sectionData.lecturerName = lecturer.name
 
     // add the section data to the courseData
-    courseData.sections.push(sectionData)
+    //courseData.sections.push(sectionData)
 
     // 🔥 your code for the reviews/ratings goes here
 
@@ -99,18 +101,18 @@ exports.handler = async function(event) {
     let reviewId = reviews[reviewIndex].id */
 
     // get the data from the reviews
-    let reviewData = reviews[reviewIndex].data()
+    let reviewData = review[reviewIndex].data()
   
-   /* // add the ratingsto the section's data
+   // add the ratingsto the section's data
     sectionData.rating = reviewData.rating
 
     // add the review data to the courseData
-    courseData.sections.push(sectionData) */
+    courseData.sections.push(sectionData)
     
 
   // add the review data to the courseData 
 
-   courseData.reviews.push(reviewData)
+   //courseData.push(reviewData)
 
   }
 
