@@ -84,9 +84,6 @@ exports.handler = async function(event) {
     // add the lecturer's name to the section's data
     sectionData.lecturerName = lecturer.name
 
-    // add the section data to the courseData
-    //courseData.sections.push(sectionData)
-
     // 🔥 your code for the reviews/ratings goes here
 
     // set a new Array for reviews
@@ -97,21 +94,19 @@ exports.handler = async function(event) {
 
     // get the documents from the query
     let reviews = reviewsQuery.docs
-    
+
+    //define a variable for the number of reviews
+
+    //define a variable for the sum of ratings
+
     // loop through the documents because you have multiple reviews per section
     for (let reviewIndex=0; reviewIndex < reviews.length; reviewIndex++) {
-    
-    // get the document ID of the reviews
-    let reviewId = reviews[reviewIndex].id 
 
     // get the data from the reviews
     let reviewData = reviews[reviewIndex].data()
-    // 
-    let rating = reviewData.rating
 
-  // add the review data into the section data ------might need to reposition this after the ratings array------
+  // add the review data into the section data 
   sectionData.reviews.push(reviewData)
-  ///sectionData.reviews.push(rating)
 
     }
   //set a new array for ratings
@@ -122,7 +117,6 @@ exports.handler = async function(event) {
 
   // get the documents from the query
   let rating = ratingsQuery.docs
-
 
   for (let ratingsIndex = 0; ratingsIndex < rating.length; ratingsIndex ++) {
   let ratingData = rating[ratingsIndex].data()
@@ -135,13 +129,12 @@ exports.handler = async function(event) {
   for (let i = 0; i < sectionData.ratings.length; i++) {
 
 sectionTotalRating += (sectionData.ratings[i])
-///sectionData.ratings.push(sectionTotalRating)
+
+
   }
-console.log (sectionTotalRating)
+  
   //sectionTotalRating += (sectionDataRatings[ratingsIndex]+sectionDataRatings[ratingsIndex])
   }
-
-
 
     // add the section data to the courseData
     courseData.sections.push(sectionData)
@@ -149,10 +142,17 @@ console.log (sectionTotalRating)
     //count the reviews per section
     sectionData.reviewsPerSection = reviews.length 
 
-    //sectionData.reviews.ratings = ratings.length
+    //sum the ratings from the ratings array into a single variable
+      let totalRatings = 0;
 
-    sectionData.averageRating = sectionTotalRating/sectionData.reviewsPerSection
+      for(var i=0; i < sectionData.ratings.length; i++){
+      totalRatings += (sectionData.ratings[i]);
+
+    }
+    //find the average rating within the sections using the variable you just created
+    sectionData.averageRatingPerSection = totalRatings/sectionData.reviewsPerSection
   }
+
   // return the standard response
   return {
     statusCode: 200,
