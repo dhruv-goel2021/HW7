@@ -67,13 +67,14 @@ exports.handler = async function(event) {
   let sections = sectionsQuery.docs
 
   // loop through the documents...need a loop here because you have multiple sections per course
-  for (let i=0; i < sections.length; i++) {
+  for (let sectionIndex=0; sectionIndex < sections.length; sectionIndex++) {
+
     // get the document ID of the section
-    let sectionId = sections[i].id
+    let sectionId = sections[sectionIndex].id
 
     // get the data from the section
-    let sectionData = sections[i].data()
-
+    let sectionData = sections[sectionIndex].data()
+    
     // ask Firebase for the lecturer with the ID provided by the section; hint: read "Retrieve One Document (when you know the Document ID)" in the reference, no need for a loop here since you only have one lecturer per section
     let lecturerQuery = await db.collection('lecturers').doc(sectionData.lecturerId).get()
 
@@ -88,38 +89,75 @@ exports.handler = async function(event) {
 
     // 🔥 your code for the reviews/ratings goes here
 
+    // set a new Array for reviews
+    sectionData.reviews = []
+
     // ask Firebase for the reviews corresponding to the section ID of the course, wait for the response
-  let reviewsQuery = await db.collection(`reviews`).where(`sectionId`, `==`, sectionId).get()
+    let reviewsQuery = await db.collection(`reviews`).where(`sectionId`, `==`, sectionId).get()
 
-  // get the documents from the query
-  let review = reviewsQuery.docs
-
-  // loop through the documents because you have multiple reviews per section
-  for (let reviewIndex=0; reviewIndex < review.length; reviewIndex++) {
+    // get the documents from the query
+    let reviews = reviewsQuery.docs
     
-    /* // get the document ID of the reviews
-    let reviewId = reviews[reviewIndex].id */
+    // loop through the documents because you have multiple reviews per section
+    for (let reviewIndex=0; reviewIndex < reviews.length; reviewIndex++) {
+    
+    // get the document ID of the reviews
+    let reviewId = reviews[reviewIndex].id 
 
     // get the data from the reviews
-    let reviewData = review[reviewIndex].data()
+    let reviewData = reviews[reviewIndex].data()
+    // 
+    let rating = reviewData.rating
+
+  // add the review data into the section data ------might need to reposition this after the ratings array------
+  sectionData.reviews.push(reviewData)
+  ///sectionData.reviews.push(rating)
+
+    }
+  //set a new array for ratings
+  sectionData.ratings = []
+
+  // ask Firebase for the reviews corresponding to the section ID of the course, wait for the response
+  let ratingsQuery = await db.collection(`reviews`).where(`sectionId`, `==`, sectionId).get()
+
+  // get the documents from the query
+  let rating = ratingsQuery.docs
+
+
+  for (let ratingsIndex = 0; ratingsIndex < rating.length; ratingsIndex ++) {
+  let ratingData = rating[ratingsIndex].data()
+  let primeRating = ratingData.rating
   
-   // add the ratingsto the section's data
-    sectionData.rating = reviewData.rating
+  sectionData.ratings.push(primeRating)
 
-    // add the review data to the courseData
-    courseData.sections.push(sectionData)
-    
+  let sectionTotalRating = 0;
 
-  // add the review data to the courseData 
+  for (let i = 0; i < sectionData.ratings.length; i++) {
 
-   //courseData.push(reviewData)
-
+sectionTotalRating += (sectionData.ratings[i])
+///sectionData.ratings.push(sectionTotalRating)
+  }
+console.log (sectionTotalRating)
+  //sectionTotalRating += (sectionDataRatings[ratingsIndex]+sectionDataRatings[ratingsIndex])
   }
 
+
+
+    // add the section data to the courseData
+    courseData.sections.push(sectionData)
+    
+    //count the reviews per section
+    sectionData.reviewsPerSection = reviews.length 
+
+    //sectionData.reviews.ratings = ratings.length
+
+    sectionData.averageRating = sectionTotalRating/sectionData.reviewsPerSection
+  }
   // return the standard response
   return {
     statusCode: 200,
     body: JSON.stringify(courseData)
   }
+
 }
-}
+
